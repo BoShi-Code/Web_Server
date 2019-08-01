@@ -1,0 +1,53 @@
+#!/bin/bash
+
+TARGET=$(pwd)/bin/webd
+CONF=$(pwd)/conf/webd.conf
+
+function usage() {
+    printf "Usage: %s [-s(start) | -q(stop) | -r(restart)]\n" "$0"
+}
+	
+function startServer() {
+	pid=$(pidof $TARGET)
+	if [ $? -eq 0 ];then
+        echo  "`date +%Y-%m-%d,%H:%m:%s`:webd's server is already runing ···"
+	else
+        ip=$(awk -F: '/ip/{print $2}' $CONF)
+        port=$(awk -F: '/port/{print $2}' $CONF)
+		$TARGET -p $port -l $log
+        echo "`date +%Y-%m-%d,%H:%m:%s`:webd's server start success ···"
+	fi
+}
+
+function stopServer() {
+	pid=$(pidof $TARGET)
+	if [ $? -eq 0 ];then
+		kill -9 $pid
+        echo "`date +%Y-%m-%d,%H:%m:%s`:webd's server stop success ···"
+	else
+        echo "`date +%Y-%m-%d,%H:%m:%s`:webd's server is already stop ···"
+	fi
+}
+
+function restartServer() {
+	stopServer
+    echo "`date +%Y-%m-%d,%H:%m:%s`:webd's server is already stop ···"
+	startServer
+    echo "`date +%Y-%m-%d,%H:%m:%s`:webd's server is already restart ···"
+}
+
+if [ $# -ne 1 ] ; then
+	usage
+fi 
+
+case $1 in 
+	-s | 'start' )
+	startServer
+	;;
+	-q | 'stop' )
+	stopServer
+	;;
+	-r | 'restart')
+	restartServer
+	;;
+esac
